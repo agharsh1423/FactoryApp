@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Field - Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+    <!-- Header -->
+    <div>
+        <a href="{% url 'consignment_edit' consignment.pk %}" class="text-blue-600 hover:text-blue-700 font-medium">
+            ← Back to {{ consignment.name }}
+        </a>
+        <h1 class="text-3xl font-bold text-gray-900 mt-4">Add Field</h1>
+        <p class="text-gray-600 mt-2">Add a new field to {{ consignment.name }}</p>
+    </div>
+    
+    <!-- Form -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Field Selection -->
+            <div>
+                <label for="{{ form.field_template.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Select Field
+                </label>
+                {{ form.field_template }}
+                {% if form.field_template.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.field_template.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-2 text-sm text-gray-600">
+                    Select an existing field, or leave blank to create a custom field below.
+                </p>
+            </div>
+            
+            <!-- Custom Field Name -->
+            <div>
+                <label for="{{ form.custom_field_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.custom_field_name.label }}
+                </label>
+                {{ form.custom_field_name }}
+                {% if form.custom_field_name.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.custom_field_name.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-2 text-sm text-gray-600">
+                    Only fill this if you want to add a custom field that's not in the templates.
+                </p>
+            </div>
+            
+            <!-- Value -->
+            <div>
+                <label for="{{ form.value.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.value.label }}
+                </label>
+                {{ form.value }}
+                {% if form.value.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.value.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-2 text-sm text-gray-600">
+                    Enter the measurement value (can be text, numbers, or mixed).
+                </p>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="flex gap-4 pt-6 border-t border-gray-200">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition">
+                    Add Field
+                </button>
+                <a href="{% url 'consignment_edit' consignment.pk %}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Info Box -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex">
+            <svg class="h-5 w-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-blue-800">Note</h3>
+                <p class="mt-1 text-sm text-blue-700">
+                    You must select either a field OR enter a custom field name, but not both.
+                    The value can be left empty and filled in later.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

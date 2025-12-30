@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Fields - Admin{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Manage Fields</h1>
+            <p class="text-gray-600 mt-1">Add and manage fields for articles</p>
+        </div>
+        <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-700 font-medium">
+            ← Back to Dashboard
+        </a>
+    </div>
+    
+    <!-- Add New Field Form -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Add New Field</h2>
+        <form method="post" action="{% url 'field_template_create' %}" class="flex gap-4">
+            {% csrf_token %}
+            {{ form.field_name }}
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-medium transition whitespace-nowrap">
+                Add Template
+            </button>
+        </form>
+    </div>
+    
+    <!-- Fields List -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900">All Fields ({{ templates|length }})</h2>
+        </div>
+        
+        {% if templates %}
+            <div class="divide-y divide-gray-200">
+                {% for template in templates %}
+                    <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900">{{ template.field_name }}</h3>
+                            <p class="text-sm text-gray-600 mt-1">
+                                Created {{ template.created_at|date:"M d, Y" }} • Used in {{ template.measurements.count }} measurements
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="{% url 'field_template_edit' template.pk %}" 
+                               class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                                Edit
+                            </a>
+                            <a href="{% url 'field_template_delete' template.pk %}" 
+                               class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                                Delete
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="px-6 py-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">No fields yet</h3>
+                <p class="mt-2 text-gray-600">Create your first field using the form above.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

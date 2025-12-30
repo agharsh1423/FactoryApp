@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Article - Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header -->
+    <div>
+        <a href="{% url 'consignment_manage' %}" class="text-blue-600 hover:text-blue-700 font-medium">
+            ← Back to Articles
+        </a>
+        <h1 class="text-3xl font-bold text-gray-900 mt-4">Create New Article</h1>
+        <p class="text-gray-600 mt-2">Add a new article and select which fields to include</p>
+    </div>
+    
+    <!-- Form -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Article Name -->
+            <div>
+                <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Article Name <span class="text-red-500">*</span>
+                </label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Select Fields Section -->
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Select Fields</h2>
+                <p class="text-sm text-gray-600 mb-4">
+                    Check the fields you want and enter their values below.
+                </p>
+                
+                <div class="space-y-4">
+                    {% for field in form %}
+                        {% if 'field_' in field.name and 'value_' not in field.name and field.name != 'name' %}
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center mb-3">
+                                    {{ field }}
+                                    <label for="{{ field.id_for_label }}" class="ml-2 text-base font-medium text-gray-900">
+                                        {{ field.label }}
+                                    </label>
+                                </div>
+                                <div class="ml-6">
+                                    <label class="block text-sm text-gray-600 mb-1">Value:</label>
+                                    {% for value_field in form %}
+                                        {% if 'value_' in value_field.name %}
+                                            {% if field.name|slice:"6:" == value_field.name|slice:"6:" %}
+                                                {{ value_field }}
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="flex gap-4 pt-6 border-t border-gray-200">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition">
+                    Create Article
+                </button>
+                <a href="{% url 'consignment_manage' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Info Box -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex">
+            <svg class="h-5 w-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-blue-800">Tips</h3>
+                <ul class="mt-1 text-sm text-blue-700 list-disc list-inside space-y-1">
+                    <li>Start typing in a field value to automatically select it</li>
+                    <li>You can leave field values empty and fill them later</li>
+                    <li>After creating the article, you can add custom fields</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-check checkbox when value input is entered
+document.addEventListener('DOMContentLoaded', function() {
+    const valueInputs = document.querySelectorAll('input[type="text"][name^="value_"]');
+    
+    valueInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                // Get the field ID from the value input name (value_123 -> 123)
+                const fieldId = this.name.replace('value_', '');
+                const checkbox = document.querySelector('input[name="field_' + fieldId + '"]');
+                if (checkbox && !checkbox.checked) {
+                    checkbox.checked = true;
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

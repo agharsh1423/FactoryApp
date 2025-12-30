@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}All Articles - Factory Management{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Articles</h1>
+        </div>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="bg-white rounded-lg shadow p-4">
+        <form method="get" action="{% url 'consignment_list' %}" class="flex gap-2">
+            <input 
+                type="text" 
+                name="search" 
+                value="{{ search_query }}"
+                placeholder="Search articles by name..." 
+                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+            <button 
+                type="submit" 
+                class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition"
+            >
+                Search
+            </button>
+            {% if search_query %}
+            <a 
+                href="{% url 'consignment_list' %}" 
+                class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition"
+            >
+                Clear
+            </a>
+            {% endif %}
+        </form>
+    </div>
+    
+    <!-- Articles Count -->
+    <div class="text-sm text-gray-600">
+        {% if search_query %}
+            Found {{ consignments|length }} article{{ consignments|length|pluralize }} matching "{{ search_query }}"
+        {% else %}
+            Total: {{ consignments|length }} article{{ consignments|length|pluralize }}
+        {% endif %}
+    </div>
+    
+    <!-- Articles List -->
+    {% if consignments %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for consignment in consignments %}
+                <a href="{% url 'consignment_detail' consignment.pk %}" 
+                   class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6 border border-gray-200 hover:border-blue-500">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-semibold text-gray-900">{{ consignment.name }}</h3>
+                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-lg shadow p-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-gray-900">No articles found</h3>
+            <p class="mt-2 text-gray-600">
+                {% if search_query %}
+                    No articles match your search. Try different keywords.
+                {% else %}
+                    There are no articles in the system yet.
+                {% endif %}
+            </p>
+            {% if user.is_authenticated %}
+            <div class="mt-6">
+                <a href="{% url 'consignment_create' %}" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Add First Article
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

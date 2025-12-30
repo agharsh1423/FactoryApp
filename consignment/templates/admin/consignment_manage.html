@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Articles - Admin{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Manage Articles</h1>
+            <p class="text-gray-600 mt-1">View, edit, and delete all articles</p>
+        </div>
+        <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-700 font-medium">
+            ← Back to Dashboard
+        </a>
+    </div>
+    
+    <!-- Add New Button -->
+    <div>
+        <a href="{% url 'consignment_create' %}" class="inline-flex items-center bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add New Article
+        </a>
+    </div>
+    
+    <!-- Search -->
+    <div class="bg-white rounded-lg shadow p-4">
+        <form method="get" action="{% url 'consignment_manage' %}">
+            <div class="flex gap-4">
+                <input type="text" name="search" placeholder="Search articles..." value="{{ request.GET.search }}"
+                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition">
+                    Search
+                </button>
+                {% if request.GET.search %}
+                    <a href="{% url 'consignment_manage' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition">
+                        Clear
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    
+    <!-- Articles List -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900">All Articles ({{ consignments|length }})</h2>
+        </div>
+        
+        {% if consignments %}
+            <div class="divide-y divide-gray-200">
+                {% for consignment in consignments %}
+                    <div class="px-6 py-4 hover:bg-gray-50">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-gray-900">{{ consignment.name }}</h3>
+                                <div class="mt-2 flex items-center gap-4 text-sm text-gray-600">
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                        </svg>
+                                        {{ consignment.measurements.count }} fields
+                                    </span>
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        Created {{ consignment.created_at|date:"M d, Y" }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <a href="{% url 'consignment_edit' consignment.pk %}" 
+                                   class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                                    Edit
+                                </a>
+                                <a href="{% url 'consignment_delete' consignment.pk %}" 
+                                   class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                                    Delete
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="px-6 py-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                </svg>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">
+                    {% if request.GET.search %}
+                        No articles found matching "{{ request.GET.search }}"
+                    {% else %}
+                        No articles yet
+                    {% endif %}
+                </h3>
+                <p class="mt-2 text-gray-600">
+                    {% if not request.GET.search %}
+                        Create your first article to get started.
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
