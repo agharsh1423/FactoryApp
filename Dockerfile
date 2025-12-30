@@ -22,12 +22,17 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . .
 
+# Make entrypoint script executable
+RUN chmod +x entrypoint.sh
+
 # Collect static files (safe to run during build)
 RUN python manage.py collectstatic --noinput
 
-# Expose port
+# Expose port (Railway will override with $PORT)
 EXPOSE 8000
 
-# DO NOT run migrations here - they will run via Procfile release command
-# Start command will come from Procfile
+# Use entrypoint script to run migrations before starting
+ENTRYPOINT ["./entrypoint.sh"]
+
+# Railway sets PORT env var, but we'll use Procfile for the actual command
 CMD ["gunicorn", "factory_project.wsgi:application", "--bind", "0.0.0.0:8000", "--log-file", "-"]
