@@ -29,7 +29,6 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -139,6 +138,13 @@ STORAGES = {
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/admin-panel/'
 LOGOUT_REDIRECT_URL = '/'
+
+# CSRF trusted origins (hardcoded for production and Railway)
+# Add your custom domain and Railway app URL here
+CSRF_TRUSTED_ORIGINS = [
+    'https://factory-app-production.up.railway.app',
+    'https://yourcustomdomain.com',  # Replace with your actual custom domain
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
