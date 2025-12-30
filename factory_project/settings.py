@@ -28,6 +28,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure--py^puuq84s#q9utwte5*
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+ALLOWED_HOSTS = ['shreebalajienterpises.up.railway.app', 'localhost']
 
 # Application definition
 
@@ -142,8 +143,10 @@ LOGOUT_REDIRECT_URL = '/'
 # CSRF trusted origins (hardcoded for production and Railway)
 # Add your custom domain and Railway app URL here
 CSRF_TRUSTED_ORIGINS = [
-    'https://shreebalajienterprises.up.railway.app/',
-]
+       'https://shreebalajienterpises.up.railway.app',
+       'http://localhost:8000',
+       'http://127.0.0.1:8000',
+   ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
