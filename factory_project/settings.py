@@ -142,7 +142,7 @@ LOGOUT_REDIRECT_URL = '/'
 # CSRF trusted origins (hardcoded for production and Railway)
 # Add your custom domain and Railway app URL here
 CSRF_TRUSTED_ORIGINS = [
-    'https://shreebalajienterprises.up.railway.app',
+    'https://shreebalajienterprises.up.railway.app/',
 ]
 
 # Default primary key field type
