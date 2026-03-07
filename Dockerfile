@@ -28,11 +28,11 @@ RUN chmod +x entrypoint.sh
 # Collect static files (safe to run during build)
 RUN python manage.py collectstatic --noinput
 
-# Expose port (Railway will override with $PORT)
+# Expose port
 EXPOSE 8000
 
 # Use entrypoint script to run migrations before starting
 ENTRYPOINT ["/app/entrypoint.sh"]
 
-# Railway sets PORT env var, but we'll use Procfile for the actual command
+# Koyeb sets PORT env var
 CMD ["gunicorn", "factory_project.wsgi:application", "--bind", "0.0.0.0:8000", "--log-file", "-"]

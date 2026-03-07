@@ -139,10 +139,10 @@ LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/admin-panel/'
 LOGOUT_REDIRECT_URL = '/'
 
-# CSRF trusted origins (hardcoded for production and Railway)
-# Add your custom domain and Railway app URL here
+# CSRF trusted origins for production
 CSRF_TRUSTED_ORIGINS = [
        'https://shreebalajienterprises.up.railway.app',
+       'https://*.onrender.com',
        'http://localhost:8000',
        'http://127.0.0.1:8000',
    ]
