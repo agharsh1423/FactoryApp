@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods
 
-from .models import Consignment, FieldTemplate, ConsignmentMeasurement
+from .models import Consignment, FieldTemplate, ConsignmentMeasurement, UserSession
 from .forms import (
     ConsignmentForm, 
     FieldTemplateForm, 
@@ -61,7 +61,8 @@ def consignment_detail(request, pk):
 
 def user_login(request):
     """
-    Login view for admin access
+    Login view for admin access.
+    Enforces single-device login — blocks login if user is already logged in elsewhere.
     """
     if request.user.is_authenticated:
         return redirect('admin_dashboard')
@@ -73,7 +74,26 @@ def user_login(request):
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
+            # Check if user already has an active session on another device
+            try:
+                existing_session = UserSession.objects.get(user=user)
+                from django.contrib.sessions.backends.db import SessionStore
+                session = SessionStore(session_key=existing_session.session_key)
+                if session.exists(existing_session.session_key):
+                    messages.error(request, 'This account is already logged in on another device. Please log out from the other device first.')
+                    return render(request, 'auth/login.html')
+                else:
+                    # Old session expired, clean up
+                    existing_session.delete()
+            except UserSession.DoesNotExist:
+                pass
+            
             login(request, user)
+            # Track this session
+            UserSession.objects.update_or_create(
+                user=user,
+                defaults={'session_key': request.session.session_key}
+            )
             messages.success(request, f'Welcome back, {user.username}!')
             return redirect('admin_dashboard')
         else:
@@ -85,8 +105,9 @@ def user_login(request):
 @login_required
 def user_logout(request):
     """
-    Logout view
+    Logout view — clears the active session tracker
     """
+    UserSession.objects.filter(user=request.user).delete()
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('consignment_list')
