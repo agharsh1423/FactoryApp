@@ -2,10 +2,22 @@
 
 {% block title %}{{ consignment.name }} - Article Details{% endblock %}
 
+{% block extra_head %}
+<style>
+    @media print {
+        nav, .print-hide, footer { display: none !important; }
+        body { background: white !important; }
+        main { padding: 0 !important; }
+        .shadow-lg { box-shadow: none !important; }
+        .rounded-lg { border-radius: 0 !important; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="space-y-6">
     <!-- Back Button -->
-    <div>
+    <div class="print-hide">
         <a href="{% url 'consignment_list' %}" class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium">
             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -21,8 +33,17 @@
                 <h1 class="text-4xl font-bold text-gray-900">{{ consignment.name }}</h1>
             </div>
             
-            {% if user.is_authenticated %}
             <div class="flex gap-2">
+            <!-- Print / Save PDF Button -->
+            <button onclick="window.print()" 
+                    class="print-hide bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition inline-flex items-center">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                Print / PDF
+            </button>
+
+            {% if user.is_authenticated %}
                 <a href="{% url 'consignment_edit' consignment.pk %}" 
                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition inline-flex items-center">
                     <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,8 +58,8 @@
                     </svg>
                     Add Field
                 </a>
-            </div>
             {% endif %}
+            </div>
         </div>
     </div>
     
@@ -62,7 +83,7 @@
                             </span>
                         </div>
                         {% if user.is_authenticated %}
-                        <div class="flex gap-2 ml-4">
+                        <div class="flex gap-2 ml-4 print-hide">
                             <a href="{% url 'measurement_edit' measurement.pk %}" 
                                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm font-medium transition">
                                 Edit
