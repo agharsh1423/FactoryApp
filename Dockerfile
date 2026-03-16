@@ -10,17 +10,28 @@ ENV PYTHONUNBUFFERED=1 \
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (including Node.js for Tailwind CSS build)
 RUN apt-get update && apt-get install -y \
     postgresql-client \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install Node dependencies and build Tailwind CSS
+COPY package.json package-lock.json* ./
+RUN npm install
+COPY tailwind.config.js ./
+COPY src/ ./src/
+
 # Copy project
 COPY . .
+
+# Build Tailwind CSS
+RUN npm run build:css
 
 # Make entrypoint script executable
 RUN chmod +x entrypoint.sh
