@@ -45,5 +45,8 @@ db.sqlite3-journal
 .DS_Store
 Thumbs.db
 
-# Node
+# Node / Tailwind build
 node_modules/
+package.json
+package-lock.json
+tailwind.config.js

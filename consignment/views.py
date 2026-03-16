@@ -75,19 +75,27 @@ def user_login(request):
         
         if user is not None:
             # Check if user already has an active session on another device
+            force_login = request.POST.get('force_login') == '1'
             try:
                 existing_session = UserSession.objects.get(user=user)
                 from django.contrib.sessions.backends.db import SessionStore
                 session = SessionStore(session_key=existing_session.session_key)
                 if session.exists(existing_session.session_key):
-                    messages.error(request, 'This account is already logged in on another device. Please log out from the other device first.')
-                    return render(request, 'auth/login.html')
+                    if force_login:
+                        # Force logout the other device by deleting its session
+                        session.delete()
+                        existing_session.delete()
+                    else:
+                        return render(request, 'auth/login.html', {
+                            'session_conflict': True,
+                            'conflict_username': username,
+                        })
                 else:
                     # Old session expired, clean up
                     existing_session.delete()
             except UserSession.DoesNotExist:
                 pass
-            
+
             login(request, user)
             # Track this session
             UserSession.objects.update_or_create(
