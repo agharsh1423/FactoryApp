@@ -18,6 +18,7 @@ urlpatterns = [
     path('admin-panel/field-templates/create/', views.field_template_create, name='field_template_create'),
     path('admin-panel/field-templates/<int:pk>/edit/', views.field_template_edit, name='field_template_edit'),
     path('admin-panel/field-templates/<int:pk>/delete/', views.field_template_delete, name='field_template_delete'),
+    path('admin-panel/field-templates/reorder/', views.field_template_reorder, name='field_template_reorder'),
     
     # Consignment Management (Admin)
     path('admin-panel/consignments/', views.consignment_manage, name='consignment_manage'),

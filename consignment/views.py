@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.db.models import Q
-from django.http import HttpResponse
+from django.db.models import Q, Max
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_http_methods
+import json
 
 from .models import Consignment, FieldTemplate, ConsignmentMeasurement, UserSession
 from .forms import (
@@ -46,7 +47,9 @@ def consignment_detail(request, pk):
     Public view: Display single consignment with all measurements
     """
     consignment = get_object_or_404(Consignment, pk=pk)
-    measurements = consignment.measurements.select_related('field_template').all()
+    measurements = consignment.measurements.select_related('field_template').order_by(
+        'field_template__order', 'field_template__field_name', 'custom_field_name'
+    )
     
     context = {
         'consignment': consignment,
@@ -153,9 +156,9 @@ def field_template_list(request):
     """
     List all field templates with add/edit/delete options
     """
-    templates = FieldTemplate.objects.all().order_by('field_name')
+    templates = FieldTemplate.objects.all().order_by('order', 'field_name')
     form = FieldTemplateForm()
-    
+
     context = {
         'templates': templates,
         'form': form,
@@ -171,12 +174,16 @@ def field_template_create(request):
     if request.method == 'POST':
         form = FieldTemplateForm(request.POST)
         if form.is_valid():
-            template = form.save()
+            template = form.save(commit=False)
+            # Set order to be at the end
+            max_order = FieldTemplate.objects.aggregate(Max('order'))['order__max']
+            template.order = (max_order or 0) + 1
+            template.save()
             messages.success(request, f'Field template "{template.field_name}" created successfully!')
             return redirect('field_template_list')
         else:
             messages.error(request, 'Error creating field template.')
-    
+
     return redirect('field_template_list')
 
 
@@ -211,17 +218,37 @@ def field_template_delete(request, pk):
     Delete field template
     """
     template = get_object_or_404(FieldTemplate, pk=pk)
-    
+
     if request.method == 'POST':
         field_name = template.field_name
         template.delete()
         messages.success(request, f'Field template "{field_name}" deleted successfully!')
         return redirect('field_template_list')
-    
+
     context = {
         'template': template,
     }
     return render(request, 'admin/field_template_confirm_delete.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def field_template_reorder(request):
+    """
+    AJAX endpoint to save field template order after drag-and-drop
+    Expects JSON body: {"order": [id1, id2, id3, ...]}
+    """
+    try:
+        data = json.loads(request.body)
+        order_ids = data.get('order', [])
+
+        # Update order for each template
+        for index, template_id in enumerate(order_ids):
+            FieldTemplate.objects.filter(pk=template_id).update(order=index)
+
+        return JsonResponse({'success': True})
+    except (json.JSONDecodeError, KeyError):
+        return JsonResponse({'success': False, 'error': 'Invalid data'}, status=400)
 
 
 # ============================================================================
@@ -260,8 +287,8 @@ def consignment_create(request):
             consignment_name = form.cleaned_data['name']
             consignment = Consignment.objects.create(name=consignment_name)
             
-            # Get all field templates
-            field_templates = FieldTemplate.objects.all()
+            # Get all field templates in order
+            field_templates = FieldTemplate.objects.all().order_by('order', 'field_name')
             
             # Create measurements for selected fields
             for template in field_templates:
@@ -305,8 +332,10 @@ def consignment_edit(request, pk):
     else:
         form = ConsignmentForm(instance=consignment)
     
-    measurements = consignment.measurements.select_related('field_template').all()
-    
+    measurements = consignment.measurements.select_related('field_template').order_by(
+        'field_template__order', 'field_template__field_name', 'custom_field_name'
+    )
+
     context = {
         'form': form,
         'consignment': consignment,

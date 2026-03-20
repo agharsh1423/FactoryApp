@@ -27,13 +27,14 @@ class FieldTemplate(models.Model):
     Acts as a field library for consignment creation
     """
     field_name = models.CharField(max_length=200, unique=True)
+    order = models.PositiveIntegerField(default=0, help_text="Display order (lower numbers appear first)")
     created_at = models.DateTimeField(default=timezone.now)
-    
+
     class Meta:
-        ordering = ['field_name']
+        ordering = ['order', 'field_name']
         verbose_name = 'Field Template'
         verbose_name_plural = 'Field Templates'
-    
+
     def __str__(self):
         return self.field_name
 

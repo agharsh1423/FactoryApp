@@ -8,13 +8,13 @@
     <div class="flex justify-between items-center">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">Manage Fields</h1>
-            <p class="text-gray-600 mt-1">Add and manage fields for articles</p>
+            <p class="text-gray-600 mt-1">Add and manage fields for articles. Drag to reorder.</p>
         </div>
         <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-700 font-medium">
             ← Back to Dashboard
         </a>
     </div>
-    
+
     <!-- Add New Field Form -->
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-xl font-bold text-gray-900 mb-4">Add New Field</h2>
@@ -26,17 +26,23 @@
             </button>
         </form>
     </div>
-    
+
     <!-- Fields List -->
     <div class="bg-white rounded-lg shadow">
         <div class="px-6 py-4 border-b border-gray-200">
             <h2 class="text-xl font-bold text-gray-900">All Fields ({{ templates|length }})</h2>
         </div>
-        
+
         {% if templates %}
-            <div class="divide-y divide-gray-200">
+            <div id="sortable-list" class="divide-y divide-gray-200">
                 {% for template in templates %}
-                    <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
+                    <div class="sortable-item px-6 py-4 flex items-center justify-between hover:bg-gray-50 bg-white" data-id="{{ template.pk }}">
+                        <!-- Drag Handle -->
+                        <div class="drag-handle cursor-grab active:cursor-grabbing mr-4 p-2 text-gray-400 hover:text-gray-600">
+                            <svg class="w-5 h-5" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
                         <div class="flex-1">
                             <h3 class="font-semibold text-gray-900">{{ template.field_name }}</h3>
                             <p class="text-sm text-gray-600 mt-1">
@@ -44,11 +50,11 @@
                             </p>
                         </div>
                         <div class="flex gap-2">
-                            <a href="{% url 'field_template_edit' template.pk %}" 
+                            <a href="{% url 'field_template_edit' template.pk %}"
                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
                                 Edit
                             </a>
-                            <a href="{% url 'field_template_delete' template.pk %}" 
+                            <a href="{% url 'field_template_delete' template.pk %}"
                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
                                 Delete
                             </a>
@@ -67,4 +73,43 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{% if templates %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sortableList = document.getElementById('sortable-list');
+    if (sortableList) {
+        new Sortable(sortableList, {
+            handle: '.drag-handle',
+            animation: 150,
+            ghostClass: 'bg-blue-50',
+            chosenClass: 'shadow-lg',
+            dragClass: 'opacity-50',
+            onEnd: function() {
+                // Get new order of IDs
+                const items = sortableList.querySelectorAll('.sortable-item');
+                const order = Array.from(items).map(item => item.dataset.id);
+
+                // Send to server
+                fetch('{% url "field_template_reorder" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ order: order })
+                }).then(response => {
+                    if (!response.ok) {
+                        console.error('Failed to save order');
+                    }
+                });
+            }
+        });
+    }
+});
+</script>
+{% endif %}
 {% endblock %}

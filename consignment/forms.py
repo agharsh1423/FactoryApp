@@ -107,7 +107,7 @@ class ConsignmentWithFieldsForm(forms.Form):
         super().__init__(*args, **kwargs)
         
         # Dynamically add checkbox for each field template
-        field_templates = FieldTemplate.objects.all().order_by('field_name')
+        field_templates = FieldTemplate.objects.all().order_by('order', 'field_name')
         
         for template in field_templates:
             # Checkbox for field selection
