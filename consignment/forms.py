@@ -88,6 +88,26 @@ class MeasurementForm(forms.ModelForm):
         return cleaned_data
 
 
+class MeasurementValueForm(forms.ModelForm):
+    """
+    Form for editing only the value of an existing measurement.
+    Used in measurement_edit view where field_template/custom_field_name should not change.
+    """
+    class Meta:
+        model = ConsignmentMeasurement
+        fields = ['value']
+        widgets = {
+            'value': forms.Textarea(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Enter value (can be text, number, or mixed)',
+                'rows': 3
+            })
+        }
+        labels = {
+            'value': 'Value'
+        }
+
+
 class ConsignmentWithFieldsForm(forms.Form):
     """
     Form for creating a new consignment with field selection

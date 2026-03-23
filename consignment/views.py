@@ -9,9 +9,10 @@ import json
 
 from .models import Consignment, FieldTemplate, ConsignmentMeasurement, UserSession
 from .forms import (
-    ConsignmentForm, 
-    FieldTemplateForm, 
+    ConsignmentForm,
+    FieldTemplateForm,
     MeasurementForm,
+    MeasurementValueForm,
     ConsignmentWithFieldsForm
 )
 
@@ -401,15 +402,15 @@ def measurement_edit(request, pk):
     Edit existing measurement
     """
     measurement = get_object_or_404(ConsignmentMeasurement, pk=pk)
-    
+
     if request.method == 'POST':
-        form = MeasurementForm(request.POST, instance=measurement)
+        form = MeasurementValueForm(request.POST, instance=measurement)
         if form.is_valid():
             form.save()
             messages.success(request, 'Measurement updated successfully!')
             return redirect('consignment_edit', pk=measurement.consignment.pk)
     else:
-        form = MeasurementForm(instance=measurement)
+        form = MeasurementValueForm(instance=measurement)
     
     context = {
         'form': form,
